@@ -168,56 +168,71 @@ class Common(object):
             run_word_len = len([i for i in ru.text.split(' ') if i not in ['', ' ']])
             trans_para_word_len = len([i for i in trans_para.split(' ') if i not in ['', ' ']])
 
-            if ru.text.startswith(" "):
-                trans_para = '*_*' + trans_para
-            if ru.text.endswith(" "):
-                trans_para = trans_para + '*_*'
+            if ru.text.startswith(" ") or ru.text.startswith(u'\xa0'):
+                if trans_para.startswith("*_*") is False:
+                    # When run text starts with a space and
+                    # trans_para does not already have the inserted spl. characters
+                    trans_para = '*_*' + trans_para
+            if ru.text.endswith(" ") or ru.text.endswith(u'\xa0'):
+                if trans_para.endswith("*_*") is False:
+                    # When run text ends with a space and
+                    # trans_para does not already have the inserted spl. characters
+                    trans_para = trans_para + '*_*'
+            if len(ru.text) >= 2:
+                # if the length of run text >2 (it is not only a comma or full-stop) and the 2nd character is a space
+                if ru.text[0] in [',','.'] and ru.text[1] == ' ':
+                    if trans_para.startswith("*_*") is False:
+                        trans_para = '*_*' + trans_para
 
-            if trans_para.strip() in ['', ' '] and len(ru.text) != 0:
-                # When trans para is already blank but still there are runs having data in them
+            if (trans_para.strip() in ['', ' '] or trans_para.replace('*_*','') in ['', ' ']) and len(ru.text) != 0:
+                # When trans para is already blank (or only *_*) but still there are runs having data in them
                 ru.text = ''
+                trans_para = ''
             elif idx == len(iterable_obj) - 1 and start_run:  # If current run is both last and First run
                 ru.text = trans_para
-                ru.text = ru.text.replace('*_*', ' ')
                 start_run = False
                 trans_para = ''
-            elif idx == len(iterable_obj) - 1 and not start_run:  # If current run is the last run
-                ru.text = ' ' + trans_para
-                ru.text = ru.text.replace('*_*', ' ')
+            elif idx == len(iterable_obj) - 1 and not start_run:
+                # If current run is the last run
+                if not trans_para.startswith('*_*'):
+                    ru.text = ' ' + trans_para
+                else:
+                    ru.text = trans_para
                 trans_para = ''
             elif run_word_len >= trans_para_word_len:  # When run has more no of words than the trans para
                 # in that case the whole translated para will go in to the current run
-                if not start_run and not trans_para.startswith(' '):
+                if not start_run and not (trans_para.startswith(' ') or trans_para.startswith('*_*')):
                     ru.text = ' ' + trans_para
-                    ru.text = ru.text.replace('*_*', ' ')
                 else:
                     ru.text = trans_para
-                    ru.text = ru.text.replace('*_*', ' ')
                 trans_para = ''
             elif start_run:  # If current run is the first run then it will be starting of the sentence
                 # in that case there will be no space in the beginning
                 ru.text = ' '.join(trans_para.split(' ', run_word_len)[0:run_word_len])
-                ru.text = ru.text.replace('*_*', ' ')
                 start_run = False
                 trans_para = trans_para.split(' ', run_word_len)[-1]
                 last_processed_run = ru
 
             else:  # If current run is the not the starting of a sentence we are appending this sentence with another
                 # sentence in that case there will be space in between those
-                ru.text = ' ' + ' '.join(trans_para.split(' ', run_word_len)[0:run_word_len])
-                ru.text = ru.text.replace('*_*', ' ')
+                # spacing changes are based on whether trans_para contains leading special characters
+                if trans_para.startswith("*_*") is False:
+                    ru.text = ' ' + ' '.join(trans_para.split(' ', run_word_len)[0:run_word_len])
+                else:
+                    ru.text = '' + ' '.join(trans_para.split(' ', run_word_len)[0:run_word_len])
                 trans_para = trans_para.split(' ', run_word_len)[-1]
                 last_processed_run = ru
+            ru.text = ru.text.replace('*_*', ' ')
 
         # Trans para is not empty, In that case take the last_processed_run and put the remaining trans para in it
         # This is for the case where translated para has more word then all runs and last runs has \n or \t
         # because of which it got skipped
-        if trans_para.strip() not in ['', ' '] and last_processed_run is not None:
+        if (trans_para.strip() not in ['', ' '] or trans_para.replace('*_*','') not in ['', ' ']) and last_processed_run is not None:
             if not start_run and not trans_para.startswith(' '):
-                last_processed_run.text = ' ' + trans_para
+                last_processed_run.text = last_processed_run.text + ' ' + trans_para
                 last_processed_run.text = last_processed_run.text.replace('*_*', ' ')
             else:
-                last_processed_run.text = trans_para
+                last_processed_run.text = last_processed_run.text + trans_para
                 last_processed_run.text = last_processed_run.text.replace('*_*', ' ')
             trans_para = ''
 
