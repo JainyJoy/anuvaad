@@ -129,13 +129,9 @@ class DocumentExporterRepository(object):
                         if para_region['class'] in ['PARA','HEADER','FOOTER']:
                             lines.append(f"{para_region['text']}\n")
                         elif para_region['class'] == 'TABLE':
-                            for cell_region in para_region['regions']:
-                                if 'class' in cell_region.keys() and 'regions' in cell_region.keys():
-                                    if cell_region['class'] in ['CELL']:
-                                        for word_region in cell_region['regions']:
-                                            if 'class' in word_region.keys() and 'text' in word_region.keys():
-                                                if word_region['class'] in ['WORD','CELL_TEXT']:
-                                                    lines.append(f"{word_region['text']}\n")
+                            cell_texts = para_region['text'].split('<END_OF_CELL>')
+                            for text in cell_texts:
+                                lines.append(f"{text}\n")
 
             return lines
         except Exception as e:
