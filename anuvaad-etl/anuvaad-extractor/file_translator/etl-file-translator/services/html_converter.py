@@ -1,4 +1,5 @@
 import os
+import shutil
 
 from anuvaad_auditor import log_info
 
@@ -252,6 +253,7 @@ class HtmlConvert(object):
                 self.html_file_dir = self.create_html_out_dir(html_out_flow2)
 
                 generated_pdf_file_path = self.convert_to_pdf(input_filename=input_filename, tool=config.TOOL_LIBRE)
+
                 # CONVERT PDF TO HTML: PDF TO HTML
                 self.generated_html_file_path = self.convert_pdf_to_html_pdftohtml(input_filename=input_filename,
                                                                                    generated_pdf_file_path=generated_pdf_file_path)
@@ -328,3 +330,35 @@ class HtmlConvert(object):
 
                 log_info("generate_html :: PPTX to PDF END : FLOW_PPTX_LIBRE_PDF_S3_ENABLED Ended.", self.json_data)
                 return self.output_files
+
+        elif self.file_type in [config.TYPE_HTML]:
+            log_info("generate_html :: HTML FLOW Started.", self.json_data)
+
+            input_filepath = self.get_input_file_path(file_name=input_filename)
+            shutil.copy2(src=input_filepath, dst=self.html_file_dir)
+
+            if common_obj.is_directory_empty(dir_path=self.html_file_dir):
+                raise FileErrors("DIRECTORY_EMPTY", f"Error while generating HTML or PDF file, Dir Path: {self.html_file_dir}")
+
+            # PUSH TO S3
+            urls = self.push_to_s3(generated_file_dir=self.html_file_dir)
+
+            generated_html_file_url = common_obj.get_url_for_specific_file(urls=urls, out_dir=self.html_file_dir,
+                                                                                 file_name=self.file_name_without_ext, extension='.html',
+                                                                                 tool=None)
+            self.output_files[config.TYPE_HTML][config.TOOL_PDF_TO_HTML] = generated_html_file_url
+            self.output_files[config.TYPE_HTML][config.TOOL_LIBRE] = generated_html_file_url
+            self.output_files[config.TYPE_PDF][config.TOOL_LIBRE] = ""
+
+            log_info("generate_html :: HTML FLOW Ended.", self.json_data)
+            return self.output_files
+
+
+
+
+
+
+
+
+
+

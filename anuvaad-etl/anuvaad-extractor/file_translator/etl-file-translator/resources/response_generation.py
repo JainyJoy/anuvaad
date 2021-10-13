@@ -81,6 +81,12 @@ class Response(object):
                         output_filename = out_json_filepath
                         out_file_type = 'json'
 
+                        html_convert_obj = HtmlConvert(input_filename=input_filename, file_type=config.TYPE_HTML, json_data=self.json_data)
+                        out_files_url = html_convert_obj.generate_html(input_filename=input_filename)
+                        fc_obj = FetchContent(record_id=input_filename, json_data=self.json_data)
+                        fc_obj.store_reference_link(job_id=jobid, location=out_files_url)
+
+
                     elif in_file_type == "json" and download_flow:
                         if config.DOCX_FILE_PREFIX in input_filename or config.DOCX1_FILE_PREFIX in input_filename:
                             name = config.DOCX1_FILE_PREFIX if config.DOCX1_FILE_PREFIX in input_filename else config.DOCX_FILE_PREFIX

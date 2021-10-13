@@ -2,6 +2,8 @@ import json
 import os
 import re
 
+from anuvaad_auditor import log_error
+
 import config
 from docx.oxml import CT_R, CT_HYPERLINK, CT_MATH, CT_DRAWING, CT_SMARTTAG
 from docx.text.run import Run
@@ -307,6 +309,16 @@ class Common(object):
         for url in urls:
             if file_pattern in url:
                 return url
+
+    def is_directory_empty(self, dir_path):
+        try:
+            if len(os.listdir(dir_path)) != 0:
+                return False
+            else:
+                return True
+
+        except Exception as e:
+            log_error("is_directory_empty : Invalid dir_path passed... " + str(e), None, e)
 
 
 common_obj = Common()
