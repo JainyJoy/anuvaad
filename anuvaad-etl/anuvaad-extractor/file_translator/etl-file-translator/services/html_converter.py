@@ -236,6 +236,10 @@ class HtmlConvert(object):
                 html_out_flow1 = os.path.join(self.file_name_without_ext, config.TOOL_LIBRE)
                 self.html_file_dir = self.create_html_out_dir(html_out_flow1)
                 self.generated_html_file_path = self.convert_directly_to_html(input_filename=input_filename, tool=config.TOOL_LIBRE)
+
+                if common_obj.is_directory_empty(dir_path=self.html_file_dir):
+                    raise FileErrors("DIRECTORY_EMPTY", f"Error while generating HTML or PDF file, Dir Path: {self.html_file_dir}")
+
                 urls = self.push_to_s3(generated_file_dir=self.html_file_dir)
                 generated_html_file_url_FLOW1 = common_obj.get_url_for_specific_file(urls=urls, out_dir=self.html_file_dir,
                                                                                      file_name=self.file_name_without_ext, extension='.html',
@@ -257,6 +261,10 @@ class HtmlConvert(object):
                 # CONVERT PDF TO HTML: PDF TO HTML
                 self.generated_html_file_path = self.convert_pdf_to_html_pdftohtml(input_filename=input_filename,
                                                                                    generated_pdf_file_path=generated_pdf_file_path)
+
+                if common_obj.is_directory_empty(dir_path=self.html_file_dir):
+                    raise FileErrors("DIRECTORY_EMPTY", f"Error while generating HTML or PDF file, Dir Path: {self.html_file_dir}")
+
                 # PUSH TO S3
                 urls = self.push_to_s3(generated_file_dir=self.html_file_dir)
                 generated_html_file_url_FLOW2 = common_obj.get_url_for_specific_file(urls=urls, out_dir=self.html_file_dir,
@@ -294,6 +302,10 @@ class HtmlConvert(object):
                 # CONVERT PDF TO HTML: PDF TO HTML
                 self.generated_html_file_path = self.convert_pdf_to_html_pdftohtml(input_filename=input_filename,
                                                                                    generated_pdf_file_path=generated_pdf_file_path)
+
+                if common_obj.is_directory_empty(dir_path=self.html_file_dir):
+                    raise FileErrors("DIRECTORY_EMPTY", f"Error while generating HTML or PDF file, Dir Path: {self.html_file_dir}")
+
                 # PUSH TO S3
                 urls = self.push_to_s3(generated_file_dir=self.html_file_dir)
 
