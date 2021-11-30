@@ -127,11 +127,11 @@ class DocumentExporterRepository(object):
                 for para_region in page['regions']:
                     if 'class' in para_region.keys() and 'regions' in para_region.keys():
                         if para_region['class'] in ['PARA','HEADER','FOOTER']:
-                            lines.append(f"{para_region['text']}\n")
+                            lines.append(f"{self.edit_google_vision_text(para_region['text'])}\n")
                         elif para_region['class'] == 'TABLE':
                             cell_texts = para_region['text'].split('<END_OF_CELL>')
                             for text in cell_texts:
-                                lines.append(f"{text}\n")
+                                lines.append(f"{self.edit_google_vision_text(text)}\n")
 
             return lines
         except Exception as e:
@@ -147,3 +147,26 @@ class DocumentExporterRepository(object):
                 
         except Exception as e:
             log_exception("Exception while writing to txt", MODULE_CONTEXT, e)
+
+    def edit_google_vision_text(self,text):
+        """Method to process the text
+        - removing extra spaces craeted before or after special characters
+        """
+        s1=text
+        try:
+            log_info("Correcting google vision text to remove extra spacing",MODULE_CONTEXT)
+            i=0
+            while(i<len(s)):
+                s1=s
+                if s[i] in ["/","।",'।' ,':','|',"," ,'०',"]","-",")","}"] and s[i-1]==" ":    
+                    s=s[:i-1]+s[i:]
+                    if i > 0 :
+                        if s[i-1] in ["-","[","{","/","("] and s[i]==" ":
+                            s=s[:i]+s[i+1:]
+                elif s[i] in ["-","[","{","/","("] and s[i+1]==" ":
+                    s=s[:i+1]+s[i+2:]
+                i=i+1
+        except Exception as e:
+            log_exception("Exception while correcting google vision text", MODULE_CONTEXT, e)
+            return s1
+        return s
