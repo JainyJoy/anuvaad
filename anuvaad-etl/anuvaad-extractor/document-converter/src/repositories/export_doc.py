@@ -156,17 +156,17 @@ class DocumentExporterRepository(object):
         try:
             log_info("Correcting google vision text to remove extra spacing",MODULE_CONTEXT)
             i=0
-            while(i<len(s)):
-                s1=s
-                if s[i] in ["/","।",'।' ,':','|',"," ,'०',"]","-",")","}"] and s[i-1]==" ":    
-                    s=s[:i-1]+s[i:]
+            while(i<len(text)):
+                s1=text
+                if text[i] in ["/","।",'।' ,':','|',"," ,'०',"]","-",")","}"] and text[i-1]==" ":    
+                    text=text[:i-1]+text[i:]
                     if i > 0 :
-                        if s[i-1] in ["-","[","{","/","("] and s[i]==" ":
-                            s=s[:i]+s[i+1:]
-                elif s[i] in ["-","[","{","/","("] and s[i+1]==" ":
-                    s=s[:i+1]+s[i+2:]
+                        if text[i-1] in ["-","[","{","/","("] and text[i]==" ":
+                            text=text[:i]+text[i+1:]
+                elif text[i] in ["-","[","{","/","("] and text[i+1]==" ":
+                    text=text[:i+1]+text[i+2:]
                 i=i+1
         except Exception as e:
             log_exception("Exception while correcting google vision text", MODULE_CONTEXT, e)
             return s1
-        return s
+        return text
